@@ -21,9 +21,7 @@
 				-webkit-transform : scaleX(-1);
 				transform : scaleX(-1);
 				-ms-filter : fliph; /*IE*/
-				filter : fliph; /*IE*/
-
-				
+				filter : fliph; /*IE*/				
 			}
 
 			#videoel {
@@ -31,21 +29,19 @@
 				-webkit-transform : scaleX(-1);
 				transform : scaleX(-1);
 				-ms-filter : fliph; /*IE*/
-				filter : fliph; /*IE*/
-
-			
+				filter : fliph; /*IE*/			
 			}
 
 			#container {
 				position : relative;
-				width : 370px;
+				width : 800px;
 			}
 
 			#content {
-				margin-top : 50px;
+				margin-top : 0px;
 				margin-left : auto;
 				margin-right : auto;
-				max-width: 600px;
+				max-width: 800px;
 			}
 
 			h2 {
@@ -101,24 +97,21 @@
 		<script src="./js/libs/poisson_new.js"></script>
 
 		<div id="content">
-			<h2>Face deformation</h2>
+			<h2>I might look like this if I had a stroke</h2>
 			<div id="container">
-				<video id="videoel" width="400" height="300" preload="auto" loop playsinline autoplay>
+				<video id="videoel" width="800" height="500" preload="auto" loop playsinline autoplay>
 				</video>
-				<canvas id="overlay" width="400" height="300"></canvas>
-				<canvas id="webgl" width="400" height="300"></canvas>
+				<canvas id="overlay" width="800" height="500"></canvas>
+				<canvas id="webgl" width="800" height="500"></canvas>
 			</div>
 			<br/>
 			<div id="controls">
-				<select name="deformation" id="deform">
-					<option value="unwell">Unwell</option>
-					<option value="none">None</option>
-				</select>
-				<p class="sublabel">Facedeform preset</p>
 				<input class="btn" type="button" value="wait, loading video & images" disabled="disabled" onclick="startVideo()" id="startbutton"></input>
+				<button type="button" id="deform-stroke">Stroke Simulation</button>
+				<button type="button" id="deform-reset">RESET</button>
 			</div>
 			<div id="text">
-				<p>TEST This is a demo of real-time <em>face deformation</em> with a parametric model using the javascript library <a href="https://github.com/auduno/clmtrackr"><em>clmtrackr</em></a>.</p>
+				<p>This is a demo of real-time face deformation to simulate how stroke effect the facial appearance using the javascript library <a href="https://github.com/auduno/clmtrackr"><em>clmtrackr</em></a>.</p>
 			</div>
 			<script>
 				// when everything is ready, automatically start everything ?
@@ -143,7 +136,7 @@
 				function enablestart() {
 					if (videoReady && imagesReady) {
 						var startbutton = document.getElementById('startbutton');
-						startbutton.value = "GO!";
+						startbutton.value = "Start";
 						startbutton.disabled = null;
 					}
 				}
@@ -234,8 +227,6 @@
 				}
 
 				vid.addEventListener('canplay', function() {videoReady = true;enablestart();}, false);
-
-
 
 
 				/*********** Code for face substitution *********/
@@ -334,7 +325,6 @@
 				]
 
 				function drawGridLoop() {
-					// console.log("drawGridLoop");
 					// get position of face
 					positions = ctrack.getCurrentPosition();
 
@@ -353,7 +343,6 @@
 				}
 
 				function drawMaskLoop() {
-					// console.log("drawMaskLoop");
 					videocanvas.getContext('2d').drawImage(vid,0,0,videocanvas.width,videocanvas.height);
 
 					// length of pos = 71
@@ -396,7 +385,6 @@
 								newPos[normal[i]][0] = pos[normal[i]][0];
 								newPos[normal[i]][1] = pos[normal[i]][1];
 							}
-							// console.log(normal.length);
 
 							// draw mask on top of face
 							// length of newPos = 94
@@ -429,33 +417,43 @@
 				};
 
 				var ph = new parameterHolder();
-				var gui = new dat.GUI();
 
 				var presets = {
-					"unwell" : [0, 0, 0, 0, -10, -15, 25, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0],
+					"stroke" : [0, 0, 0, 0, -10, -15, 25, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0],
 					"none" : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 				};
 
+/**
+				// show the components control on the page
+				var gui = new dat.GUI();
 				var control = {};
 				var eig = 0;
 				for (var i = 0;i < pnums;i++) {
 					eig = Math.sqrt(pModel.shapeModel.eigenValues[i+2])*3
 					control['c'+(i+3)] = gui.add(ph, 'component '+(i+3), -5*eig, 5*eig).listen();
 				}
-
+**/
 				/********** defaults code **********/
 
-				function switchDeformedFace(e) {
+				function setStrokeSim(e) {
 					//var split = ph.presets.split(",");
 					for (var i = 0;i < pnums;i++) {
-						ph['component '+(i+3)] = presets[e.target.value][i];
+						ph['component '+(i+3)] = presets['stroke'][i];
 					}
 				}
-				//switch deform face based on the dropdown selection (id: deform)
-				document.getElementById('deform').addEventListener('change', switchDeformedFace, false);
+
+				function setNone(e) {
+					//var split = ph.presets.split(",");
+					for (var i = 0;i < pnums;i++) {
+						ph['component '+(i+3)] = presets['none'][i];
+					}
+				}
+
+				document.getElementById('deform-stroke').addEventListener('click', setStrokeSim, false);
+				document.getElementById('deform-reset').addEventListener('click', setNone, false);
 
 				for (var i = 0;i < pnums;i++) {
-					ph['component '+(i+3)] = presets['unwell'][i];
+					ph['component '+(i+3)] = presets['stroke'][i];
 				}
 			</script>
 		</div>
